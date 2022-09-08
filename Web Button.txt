@@ -1,0 +1,135 @@
+# inclui  < Arduíno.h >
+# inclui  < ESP8266WiFi.h >
+
+
+const  char * ssid = " PROF.RAFAEL " ;
+const  char * senha = " " ;
+Endereço IP ip ( 192 , 168 , 1 , 123 );
+gateway de endereço IP ( 192 , 168 , 1 , 1 );
+sub -rede IPAddress ( 255 , 255 , 255 , 0 );
+
+
+
+servidor WiFiServer ( 80 );
+
+
+Cabeçalho da string;
+
+
+String output5State = " off " ;
+
+
+
+const  int saída5 = 5 ;
+
+
+unsigned  long currentTime = millis();
+
+unsigned  long previousTime = 0 ;
+
+const  long timeoutTime = 2000 ;
+
+void  configuração () {
+  Serial. começar ( 9600 );
+  
+  pinMode (saída5, SAÍDA);
+
+ 
+  digitalWrite (saída5, BAIXO);
+ 
+
+ 
+  Serial. print ( " Conectando a " );
+  Serial. println (ssid);
+  Wi-fi. começar (ssid, senha);
+  Wi-fi. config (ip, gateway, sub-rede);
+  while (WiFi. status () != WL_CONNECTED) {
+    atraso ( 500 );
+    Serial. imprima ( " . " );
+  }
+
+  Serial. println ( " " );
+  Serial. println ( " WiFi conectado. " );
+  Serial. println ( " Endereço IP: " );
+  Serial. println (WiFi. localIP ());
+  servidor. começar ();
+}
+
+void  loop (){
+  Cliente WiFiClient = servidor. disponível ();  
+  if (cliente) {                             
+    Serial. println ( " Novo Cliente. " );        
+    String currentLine = " " ;                
+    currentTime = milis ();
+    hora anterior = hora atual;
+    while (cliente. conectado () && currentTime - previousTime <= timeoutTime) {
+      currentTime = milis ();         
+      if (cliente. disponível ()) {             
+        caractere c = cliente. leia ();            
+        Serial. escreva (c);                    
+        cabeçalho += c;
+        if (c == ' \n ' ){                    
+          
+          if (currentLine. comprimento () == 0 ) {
+           
+            cliente. println ( " HTTP/1.1 200 OK " );
+            cliente. println ( " Conteúdo-tipo:texto/html " );
+            cliente. println ( " Conexão: fechar " );
+            cliente. println ();
+            
+            
+            if (header. indexOf ( " GET /5/on " ) >= 0 ) {
+              Serial. println ( " GPIO 5 ativado " );
+              output5State = " on " ;
+              digitalWrite (saída5, ALTO);
+            } else  if (header. indexOf ( " GET /5/off " ) >= 0 ) {
+              Serial. println ( " GPIO 5 desligado " );
+              output5State = " off " ;
+              digitalWrite (saída5, BAIXO);
+            }
+            
+        
+            cliente. println ( " <!DOCTYPE html><html> " );
+            cliente. println ( " <head><meta name= \" viewport \" content= \" largura=largura do dispositivo, escala inicial=1 \" > " );
+            cliente. println ( " <link rel= \" icon \" href= \" data:, \" > " );
+            
+            cliente. println ( " <style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;} " );
+            cliente. println ( " .button { cor de fundo: #195B6A; borda: nenhuma; cor: branco; preenchimento: 16px 40px; " );
+            cliente. println ( " text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;} " );
+            cliente. println ( " .button2 {cor de fundo: #77878A;}</style></head> " );
+            
+           
+            cliente. println ( " <body><h1>ESP8266 Servidor Web</h1> " );
+            cliente. println ( " <body><h2>Prof. Rafael</h2> " );
+            
+          
+            cliente. println ( " <p>GPIO 5 - Estado " + output5State + " </p> " );
+                  
+            if (output5State== " off " ) {
+              cliente. println ( " <p><a href= \" /5/on \" ><button class= \" button \" >ON</button></a></p> " );
+            } senão {
+              cliente. println ( " <p><a href= \" /5/off \" ><button class= \" button button2 \" >OFF</button></a></p> " );
+            }
+               
+            cliente. println ( " </body></html> " );
+            
+           
+            cliente. println ();
+            
+            quebrar ;
+          } senão {
+            linha atual = " " ;
+          }
+        } senão  if (c != ' \r ' ) {
+          linha atual += c;      
+        }
+      }
+    }
+   
+    cabeçalho = " " ;
+   
+    cliente. parar ();
+    Serial. println ( " Cliente desconectado. " );
+    Serial. println ( " " );
+  }
+}
